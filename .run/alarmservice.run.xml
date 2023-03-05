@@ -16,7 +16,7 @@
     <package value="github.com/pinguinens/site-alarm" />
     <directory value="$PROJECT_DIR$/cmd/service" />
     <filePath value="$PROJECT_DIR$" />
-    <output_directory value="$PROJECT_DIR$/build" />
+    <output_directory value="$PROJECT_DIR$/.build" />
     <method v="2" />
   </configuration>
 </component>
