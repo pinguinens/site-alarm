@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"os"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -31,7 +32,7 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 	for {
-		buffer := make([]byte, 1024)
+		buffer := make([]byte, 128)
 		_, err := conn.Read(buffer)
 		if err != nil {
 			if err.Error() == "EOF" {
@@ -53,7 +54,9 @@ func handleConnection(conn net.Conn) {
 			}
 		}
 
-		log.Info().Bytes("input", content).Send()
+		parts := strings.Split(string(content), "\n")
+
+		log.Info().Str("code", parts[0]).Str("method", parts[1]).Str("url", parts[2]).Str("addr", parts[3]).Send()
 		newmessage := "OK"
 		conn.Write([]byte(newmessage))
 	}
