@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"net"
+	"os"
 
 	"github.com/rs/zerolog/log"
 )
@@ -17,10 +17,13 @@ func main() {
 	if err != nil {
 		log.Err(err)
 	}
+	defer ln.Close()
+
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			log.Err(err)
+			os.Exit(1)
 		}
 		go handleConnection(conn)
 	}
@@ -28,10 +31,31 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 	for {
-		message, _ := bufio.NewReader(conn).ReadString('\n')
-		log.Info().Str("input", message).Send()
+		buffer := make([]byte, 1024)
+		_, err := conn.Read(buffer)
+		if err != nil {
+			if err.Error() == "EOF" {
+				conn.Close()
+				return
+			}
+
+			log.Err(err)
+			return
+		}
+		if buffer == nil {
+			log.Info().Msg("empty buf")
+			return
+		}
+		content := make([]byte, 0, len(buffer))
+		for _, v := range buffer {
+			if v != 0 {
+				content = append(content, v)
+			}
+		}
+
+		log.Info().Bytes("input", content).Send()
 		newmessage := "OK"
-		conn.Write([]byte(newmessage + "\n"))
+		conn.Write([]byte(newmessage))
 	}
 }
 
