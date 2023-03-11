@@ -2,33 +2,32 @@ package api
 
 import (
 	"net"
-	"os"
 	"strings"
 
-	"github.com/rs/zerolog/log"
+	log "github.com/rs/zerolog"
 )
 
 type API struct {
+	logger *log.Logger
 }
 
-func New() (*API, error) {
-	ln, err := net.Listen("tcp", ":8081")
+func New(logger *log.Logger, addr string) (*API, error) {
+	ln, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Err(err)
+		logger.Error().Msg(err.Error())
 	}
 	defer ln.Close()
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Err(err)
-			os.Exit(1)
+			return nil, err
 		}
-		go handleConnection(conn)
+		go handleConnection(conn, logger)
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, logger *log.Logger) {
 	for {
 		buffer := make([]byte, 128)
 		_, err := conn.Read(buffer)
@@ -38,11 +37,11 @@ func handleConnection(conn net.Conn) {
 				return
 			}
 
-			log.Err(err)
+			logger.Error().Msg(err.Error())
 			return
 		}
 		if buffer == nil {
-			log.Info().Msg("empty buf")
+			logger.Info().Msg("empty buf")
 			return
 		}
 		content := make([]byte, 0, len(buffer))
@@ -54,7 +53,7 @@ func handleConnection(conn net.Conn) {
 
 		parts := strings.Split(string(content), "\n")
 
-		log.Info().Str("code", parts[0]).Str("method", parts[1]).Str("url", parts[2]).Str("addr", parts[3]).Send()
+		logger.Info().Str("code", parts[0]).Str("method", parts[1]).Str("url", parts[2]).Str("addr", parts[3]).Send()
 		newmessage := "OK"
 		conn.Write([]byte(newmessage))
 	}
