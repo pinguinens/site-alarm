@@ -27,15 +27,13 @@ func main() {
 		log.Fatal().Msg(err.Error())
 	}
 
-	appApi, err := api.New(&log.Logger, appConfig.Listen.Address)
+	svc, err := service.New(&log.Logger, appVersion, appConfig.Listen.Address)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
 
-	svc, err := service.New(appApi)
+	_, err = api.New(svc)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
-
-	svc.Start()
 }

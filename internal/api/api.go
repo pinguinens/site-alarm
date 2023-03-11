@@ -5,16 +5,18 @@ import (
 	"strings"
 
 	log "github.com/rs/zerolog"
+
+	"github.com/pinguinens/site-alarm/internal/service"
 )
 
 type API struct {
-	logger *log.Logger
+	service *service.Service
 }
 
-func New(logger *log.Logger, addr string) (*API, error) {
-	ln, err := net.Listen("tcp", addr)
+func New(svc *service.Service) (*API, error) {
+	ln, err := net.Listen("tcp", svc.GetAddr())
 	if err != nil {
-		logger.Error().Msg(err.Error())
+		svc.Logger.Error().Msg(err.Error())
 	}
 	defer ln.Close()
 
@@ -23,7 +25,7 @@ func New(logger *log.Logger, addr string) (*API, error) {
 		if err != nil {
 			return nil, err
 		}
-		go handleConnection(conn, logger)
+		go handleConnection(conn, svc.Logger)
 	}
 }
 

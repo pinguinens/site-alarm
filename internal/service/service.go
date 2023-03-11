@@ -1,17 +1,23 @@
 package service
 
 import (
-	"github.com/pinguinens/site-alarm/internal/api"
+	log "github.com/rs/zerolog"
 )
 
 type Service struct {
-	api *api.API
+	version string
+	addr    string
+	Logger  *log.Logger
 }
 
-func New(api *api.API) (Service, error) {
-	return Service{api: api}, nil
+func New(logger *log.Logger, version, addr string) (*Service, error) {
+	return &Service{
+		version: version,
+		addr:    addr,
+		Logger:  logger,
+	}, nil
 }
 
-func (s *Service) Start() {
-
+func (s *Service) GetAddr() string {
+	return s.addr
 }
