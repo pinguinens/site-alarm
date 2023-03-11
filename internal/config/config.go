@@ -14,7 +14,8 @@ const (
 )
 
 type Config struct {
-	Listen Listen `yaml:"listen"`
+	Listen   Listen   `yaml:"listen"`
+	Telegram Telegram `yaml:"telegram"`
 }
 
 func New(path string) (*Config, error) {

@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/pinguinens/site-alarm/internal/config"
+	"github.com/pinguinens/site-alarm/internal/messenger"
 	"github.com/pinguinens/site-alarm/internal/server"
 	"github.com/pinguinens/site-alarm/internal/service"
 )
@@ -27,7 +28,12 @@ func main() {
 		log.Fatal().Msg(err.Error())
 	}
 
-	svc, err := service.New(&log.Logger, appVersion, appConfig.Listen.Address)
+	msngr, err := messenger.New(appConfig.Telegram.Token, appConfig.Telegram.Chats)
+	if err != nil {
+		log.Fatal().Msg(err.Error())
+	}
+
+	svc, err := service.New(&log.Logger, msngr, appVersion, appConfig.Listen.Address)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}

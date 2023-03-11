@@ -3,27 +3,24 @@ package service
 import (
 	"fmt"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	log "github.com/rs/zerolog"
-)
 
-var (
-	screaming = false
-	bot       *tgbotapi.BotAPI
-	updates   tgbotapi.UpdatesChannel
+	"github.com/pinguinens/site-alarm/internal/messenger"
 )
 
 type Service struct {
-	version string
-	addr    string
-	Logger  *log.Logger
+	version   string
+	addr      string
+	Logger    *log.Logger
+	Messenger *messenger.Messenger
 }
 
-func New(logger *log.Logger, version, addr string) (*Service, error) {
+func New(logger *log.Logger, msgr *messenger.Messenger, version, addr string) (*Service, error) {
 	return &Service{
-		version: version,
-		addr:    addr,
-		Logger:  logger,
+		version:   version,
+		addr:      addr,
+		Logger:    logger,
+		Messenger: msgr,
 	}, nil
 }
 
@@ -50,20 +47,7 @@ func (s *Service) Notif(data []byte) error {
 		return err
 	}
 
-	if bot == nil {
-		bot, err = tgbotapi.NewBotAPI("")
-		if err != nil {
-			return err
-		}
-	}
-
-	bot.Debug = false
-
-	msgTg := tgbotapi.NewMessage(123, fmt.Sprintf("%v\n%v\n%v\n%v", msg.Code, msg.Method, msg.URL, msg.Address))
-	_, err = bot.Send(msgTg)
-	if err != nil {
-		return err
-	}
+	err = s.Messenger.Send(fmt.Sprintf("ℹ️Notification\n<b>Code</b>: %v\n<b>Method</b>: %v\n<b>URL</b>: %v\n<b>Address</b>: %v", msg.Code, msg.Method, msg.URL, msg.Address))
 
 	return nil
 }

@@ -2,3 +2,5 @@ listen:
   address: ":8081"
 telegram:
   token: <bot:token>
+  chats:
+    - chat_id
