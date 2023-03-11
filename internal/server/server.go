@@ -2,9 +2,6 @@ package server
 
 import (
 	"net"
-	"strings"
-
-	log "github.com/rs/zerolog"
 
 	"github.com/pinguinens/site-alarm/internal/service"
 )
@@ -25,11 +22,11 @@ func Start(svc *service.Service) error {
 		if err != nil {
 			return err
 		}
-		go handleConnection(conn, svc.Logger)
+		go handleConnection(conn, svc)
 	}
 }
 
-func handleConnection(conn net.Conn, logger *log.Logger) {
+func handleConnection(conn net.Conn, svc *service.Service) {
 	for {
 		buffer := make([]byte, 128)
 		_, err := conn.Read(buffer)
@@ -39,23 +36,18 @@ func handleConnection(conn net.Conn, logger *log.Logger) {
 				return
 			}
 
-			logger.Error().Msg(err.Error())
+			svc.Logger.Error().Msg(err.Error())
 			return
 		}
 		if buffer == nil {
-			logger.Info().Msg("empty buf")
+			svc.Logger.Info().Msg("empty buf")
 			return
 		}
-		content := make([]byte, 0, len(buffer))
-		for _, v := range buffer {
-			if v != 0 {
-				content = append(content, v)
-			}
-		}
 
-		parts := strings.Split(string(content), "\n")
+		msg := Msg{}
+		err = Decode(buffer, &msg)
 
-		logger.Info().Str("code", parts[0]).Str("method", parts[1]).Str("url", parts[2]).Str("addr", parts[3]).Send()
+		svc.Logger.Info().Int("code", msg.Code).Str("method", msg.Method).Str("url", msg.URL).Str("addr", msg.Address).Send()
 		newmessage := "OK"
 		conn.Write([]byte(newmessage))
 	}
