@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/creasty/defaults v1.6.0
 	github.com/go-playground/validator/v10 v10.11.2
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/rs/zerolog v1.29.0
 	gopkg.in/yaml.v3 v3.0.1
 )

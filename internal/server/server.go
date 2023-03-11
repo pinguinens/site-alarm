@@ -44,7 +44,7 @@ func handleConnection(conn net.Conn, svc *service.Service) {
 			return
 		}
 
-		err = svc.Log(buffer)
+		err = svc.Notif(buffer)
 		if err != nil {
 			svc.Logger.Error().Msg(err.Error())
 			return
