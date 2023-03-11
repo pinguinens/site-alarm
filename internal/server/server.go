@@ -28,11 +28,11 @@ func Start(svc *service.Service) error {
 
 func handleConnection(conn net.Conn, svc *service.Service) {
 	for {
-		buffer := make([]byte, 128)
-		_, err := conn.Read(buffer)
+		buffer, err := read(conn)
 		if err != nil {
 			if err.Error() == "EOF" {
 				conn.Close()
+				svc.Logger.Info().Msg("close connection")
 				return
 			}
 
@@ -46,11 +46,37 @@ func handleConnection(conn net.Conn, svc *service.Service) {
 
 		msg := Msg{}
 		err = Decode(buffer, &msg)
+		if err != nil {
+			svc.Logger.Error().Msg(err.Error())
+			return
+		}
 
 		svc.Logger.Info().Int("code", msg.Code).Str("method", msg.Method).Str("url", msg.URL).Str("addr", msg.Address).Send()
-		newmessage := "OK"
-		conn.Write([]byte(newmessage))
+
+		if err = write(conn, []byte("OK")); err != nil {
+			svc.Logger.Error().Msg("empty buf")
+			return
+		}
 	}
+}
+
+func read(conn net.Conn) ([]byte, error) {
+	buffer := make([]byte, 128)
+	_, err := conn.Read(buffer)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer, nil
+}
+
+func write(conn net.Conn, data []byte) error {
+	_, err := conn.Write(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //func main() {
