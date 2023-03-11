@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/pinguinens/site-alarm/internal/api"
 	"github.com/pinguinens/site-alarm/internal/config"
+	"github.com/pinguinens/site-alarm/internal/server"
 	"github.com/pinguinens/site-alarm/internal/service"
 )
 
@@ -32,7 +32,7 @@ func main() {
 		log.Fatal().Msg(err.Error())
 	}
 
-	_, err = api.New(svc)
+	err = server.Start(svc)
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}

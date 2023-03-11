@@ -1,4 +1,4 @@
-package api
+package server
 
 import (
 	"net"
@@ -13,7 +13,7 @@ type API struct {
 	service *service.Service
 }
 
-func New(svc *service.Service) (*API, error) {
+func Start(svc *service.Service) error {
 	ln, err := net.Listen("tcp", svc.GetAddr())
 	if err != nil {
 		svc.Logger.Error().Msg(err.Error())
@@ -23,7 +23,7 @@ func New(svc *service.Service) (*API, error) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		go handleConnection(conn, svc.Logger)
 	}
