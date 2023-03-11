@@ -44,14 +44,11 @@ func handleConnection(conn net.Conn, svc *service.Service) {
 			return
 		}
 
-		msg := Msg{}
-		err = Decode(buffer, &msg)
+		err = svc.Log(buffer)
 		if err != nil {
 			svc.Logger.Error().Msg(err.Error())
 			return
 		}
-
-		svc.Logger.Info().Int("code", msg.Code).Str("method", msg.Method).Str("url", msg.URL).Str("addr", msg.Address).Send()
 
 		if err = write(conn, []byte("OK")); err != nil {
 			svc.Logger.Error().Msg("empty buf")
