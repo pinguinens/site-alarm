@@ -1,12 +1,10 @@
 package service
 
 import (
-	"context"
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	log "github.com/rs/zerolog"
-	zLog "github.com/rs/zerolog/log"
 )
 
 var (
@@ -61,42 +59,11 @@ func (s *Service) Notif(data []byte) error {
 
 	bot.Debug = false
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	if updates == nil {
-		updates = bot.GetUpdatesChan(u)
+	msgTg := tgbotapi.NewMessage(123, fmt.Sprintf("%v\n%v\n%v\n%v", msg.Code, msg.Method, msg.URL, msg.Address))
+	_, err = bot.Send(msgTg)
+	if err != nil {
+		return err
 	}
-	//go receiveUpdates(ctx, updates)
-
-	handleUpdate(<-updates, &msg)
-
-	cancel()
 
 	return nil
-}
-
-func handleUpdate(update tgbotapi.Update, data *Msg) {
-	handleMessage(update.Message, data)
-}
-
-func handleMessage(message *tgbotapi.Message, data *Msg) {
-	user := message.From
-	text := message.Text
-
-	if user == nil {
-		return
-	}
-
-	// Print to console
-	zLog.Info().Msg(fmt.Sprintf("%s wrote %s", user.FirstName, text))
-
-	msg := tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("%v\n%v\n%v\n%v", data.Code, data.Method, data.URL, data.Address))
-	_, err := bot.Send(msg)
-	if err != nil {
-		zLog.Info().Msg(fmt.Sprintf("%s wrote %s", user.FirstName, text))
-		return
-	}
 }
